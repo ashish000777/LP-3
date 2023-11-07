@@ -1,58 +1,69 @@
-class Item:
-    def __init__(self, value, weight):
-        self.value = value
-        self.weight = weight
-        self.ratio = value / weight
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
 
-def fractional_knapsack(items, capacity):
-    """
-    Solves the fractional knapsack problem using a greedy method.
+// Structure for an item which stores weight and corresponding value of Item
+struct Item {
+    int profit, weight;
 
-    Args:
-        items: A list of Item objects.
-        capacity: The capacity of the knapsack.
+    // Constructor
+    Item(int profit, int weight) {
+        this->profit = profit;
+        this->weight = weight;
+    }
+};
 
-    Returns:
-        The maximum value that can be placed in the knapsack.
-    """
+// Comparison function to sort Item according to profit/weight ratio
+static bool cmp(struct Item a, struct Item b) {
+    double r1 = (double)a.profit / (double)a.weight;
+    double r2 = (double)b.profit / (double)b.weight;
+    return r1 > r2;
+}
 
-    # Sort the items in decreasing order of their value-to-weight ratio.
-    items.sort(key=lambda item: item.ratio, reverse=True)
+// Main greedy function to solve the problem
+double fractionalKnapsack(int W, vector<Item> &arr) {
+    // Sorting Item on the basis of ratio
+    sort(arr.begin(), arr.end(), cmp);
 
-    # Initialize the total value and weight in the knapsack.
-    total_value = 0
-    total_weight = 0
+    double finalvalue = 0.0;
 
-    # Iterate over the items in the sorted order.
-    for item in items:
-        # If the item fits in the knapsack, add it to the knapsack.
-        if item.weight <= capacity - total_weight:
-            total_value += item.value
-            total_weight += item.weight
-        # Otherwise, add a fraction of the item to the knapsack.
-        else:
-            fraction = (capacity - total_weight) / item.weight
-            total_value += fraction * item.value
-            total_weight += fraction * item.weight
-            break
+    // Looping through all items
+    for (int i = 0; i < arr.size(); i++) {
+        // If adding the Item won't overflow, add it completely
+        if (arr[i].weight <= W) {
+            W -= arr[i].weight;
+            finalvalue += arr[i].profit;
+        } else { // If we can't add the current Item, add the fractional part of it
+            finalvalue += arr[i].profit * ((double)W / (double)arr[i].weight);
+            break;
+        }
+    }
 
-    return total_value
+    // Returning the final value
+    return finalvalue;
+}
 
+int main() {
+    int W, N;
 
-# Example usage:
+    cout << "Enter the knapsack capacity (W): ";
+    cin >> W;
 
-# Get user input for the number of items and the capacity of the knapsack.
-num_items = int(input("Enter the number of items: "))
-capacity = int(input("Enter the capacity of the knapsack: "))
+    cout << "Enter the number of items (N): ";
+    cin >> N;
 
-# Create a list of Item objects from the user input.
-items = []
-for i in range(num_items):
-    value = int(input("Enter the value of item {}: ".format(i + 1)))
-    weight = int(input("Enter the weight of item {}: ".format(i + 1)))
-    items.append(Item(value, weight))
+    vector<Item> arr;
+    cout << "Enter the profit and weight of each item:" << endl;
+    for (int i = 0; i < N; i++) {
+        int profit, weight;
+        cin >> profit >> weight;
+        arr.push_back(Item(profit, weight));
+    }
 
-# Solve the fractional knapsack problem and print the maximum value.
-max_value = fractional_knapsack(items, capacity)
+    // Function call
+    double result = fractionalKnapsack(W, arr);
+    cout << "Maximum value that can be obtained: " << result << endl;
 
-print("The maximum value that can be placed in the knapsack is {}.".format(max_value))
+    return 0;
+}
